@@ -18,9 +18,13 @@ only weights, box prompt, single-mask output, and preprocessing differ.
    embedding per image once, then many fast decoder steps.
 
 ## ⏭ Next
-- WASM box-drag demo (encode once, decode per box) — like segment_anything_cpp/wasm but box prompt + medical preprocess.
-- GPU (`colab_medsam_gpu.ipynb`, cuBLAS seam) — build with nvcc -DUSE_CUDA -lcublas; **real T4 run = user's step**.
-- Optional: fetch the box-prompt `medsam_vit_b.pth` (browser download of Drive id 12YH-N6PAKayulhS99MBURVNpuQtVj98S) for the box-trained variant.
+- GPU (`colab_medsam_gpu.ipynb`, cuBLAS seam) — build with nvcc -DUSE_CUDA -lcublas; **real T4 run = user's step** (deferred).
+- **WASM demo**: the ViT-B encoder (91M, ~90MB fp16, minutes/encode) is too heavy for the browser. The
+  browser-friendly path is **LiteMedSAM** (lite_medsam.pth, 39MB, TinyViT) — but its TinyViT DIFFERS from
+  MobileSAM's (patch_embed **1×1** conv not 3×3, input **256** not 1024), so it needs a small arch variant
+  of net_tinyvit before it can reuse segment_anything_cpp/wasm. Deferred.
+- Optional: box-prompt `medsam_vit_b.pth` (Drive id 12YH-N6PAKayulhS99MBURVNpuQtVj98S — gdown rate-limited,
+  browser-download) for the box-trained variant.
 - Optional: real medical dataset (FLARE22 / MSD / Kvasir-SEG) loader for `train_medsam --data`.
 
 ## Notes

@@ -61,7 +61,7 @@ inline Tensor vitb_attn(const Tensor& x, const Tensor& qkvW, const Tensor& qkvB,
     Tensor k = slice_cols(qkv, C + h * hd, C + h * hd + hd);
     Tensor v = slice_cols(qkv, 2 * C + h * hd, 2 * C + h * hd + hd);
     Tensor att = add(mul_scalar(matmul(q, transpose2d(k)), scale), decomposed_rel_pos(q, rph, rpw, H, W));
-    outs.push_back(matmul(softmax_rows(att), v));
+    outs.push_back(tv_detach(matmul(softmax_rows(att), v)));         // free the [N,N] graph per head (inference)
   }
   return add_rowvec(matmul(hcat(outs), projW), projB);
 }

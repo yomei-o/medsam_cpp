@@ -28,8 +28,9 @@
   <label class="mode"><input type="radio" name="m" value="box"> box (drag)</label>
   <span id="status">loading model…</span>
 </div>
-<div class="hint">1) pick a medical image → 2) <b>Encode</b> (ViT-B runs once; this is heavy — tens of seconds to a
-couple minutes) → 3) <b>click a point</b> or <b>drag a box</b> over a structure to segment it.</div>
+<div class="hint">A sample abdominal-CT slice is loaded by default (or pick your own image). 1) <b>Encode</b>
+(ViT-B runs once; heavy — ~1–2 min) → 2) <b>click a point</b> or <b>drag a box</b> over an organ/structure
+to segment it. Sample image from the <a href="https://github.com/bowang-lab/MedSAM" style="color:#58a6ff">MedSAM</a> repo.</div>
 <div class="wrap"><canvas id="cv"></canvas></div>
 
 <script src="medsam.js"></script>
@@ -55,17 +56,17 @@ async function boot() {
   M.FS.writeFile('/medsam/weights_fp16.bin', new Uint8Array(dec));
   M.FS.writeFile('/medsam/config.txt', cfg);
   M.ccall('fn_ready', 'number', [], []);
-  $('status').textContent = 'ready — pick an image';
+  loadImage('sample.png', 'ready — sample CT loaded, click Encode (or pick your own image)');
 }
 
-$('file').onchange = e => {
-  const f = e.target.files[0]; if (!f) return;
-  const img = new Image();
+function loadImage(src, note) {
+  const img = new Image(); img.crossOrigin = 'anonymous';
   img.onload = () => { W0 = img.width; H0 = img.height; cv.width = W0; cv.height = H0;
     ctx.drawImage(img, 0, 0); base = ctx.getImageData(0, 0, W0, H0);
-    encoded = false; $('enc').disabled = false; $('status').textContent = 'image loaded — click Encode'; };
-  img.src = URL.createObjectURL(f);
-};
+    encoded = false; if (M) $('enc').disabled = false; $('status').textContent = note || 'image loaded — click Encode'; };
+  img.src = src;
+}
+$('file').onchange = e => { const f = e.target.files[0]; if (f) loadImage(URL.createObjectURL(f)); };
 
 $('enc').onclick = async () => {
   if (!M || !base) return; $('enc').disabled = true;

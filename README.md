@@ -15,7 +15,14 @@ differ. Reference checkpoint: `medsam_vit_b.pth` (a SAM ViT-B state dict).
 1. ✅ export MedSAM weights (`pure/ref/export_medsam.py`) → **parity vs PyTorch: encoder 5.29e-6, mask 5.91e-5, IoU exact MATCH** (`m1_medsam.cpp`)
 2. ✅ inference (`pure/infer_medsam.cpp`): image + `--point x y` / `--box x0 y0 x1 y1` → mask overlay (resize 1024 + min-max [0,1], single mask)
 3. ✅ training (`pure/train_medsam.cpp` + `sam_loss.hpp`): focal+dice+IoU on the single mask, decoder fine-tune (encoder frozen)
-4. ✅ GPU/Colab (`colab_medsam_gpu.ipynb`, cuBLAS seam; real T4 run pending) — 5. ⏭ WASM box-drag demo
+4. ✅ GPU/Colab (`colab_medsam_gpu.ipynb`, cuBLAS seam; real T4 run pending)
+5. ✅ **WASM demo** (`wasm/`) — in-browser point/box segmentation, ViT-B encode ~1.5 min (Eigen + 32 MB WASM stack)
+
+## 🩻 Live demo — [**yomei-o.github.io/medsam_cpp/wasm/**](https://yomei-o.github.io/medsam_cpp/wasm/)
+Pick a medical image → **Encode** (the 91M ViT-B runs once, in-browser — **heavy, ~1.5 min**) →
+**click a point** or **drag a box** over a structure to segment it. Pure C++ → WebAssembly, no server,
+no upload. Ships fp16 weights (~180 MB, split into two chunks). Yes, a 91M encoder *can* run in the
+browser — it's just a heavy one-time encode; the per-prompt decode is fast (~3 s).
 
 Uses **medsam_point_prompt_flare22.pth** (ViT-B, point-prompt, abdominal CT). Build:
 `cl /std:c++20 /O2 /EHsc /Zc:preprocessor /DNOMINMAX /Ipure\third_party pure\infer_medsam.cpp` then
